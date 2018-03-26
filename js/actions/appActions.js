@@ -1842,6 +1842,16 @@ const appActions = {
     })
   },
 
+  nativeNotificationCreate: function (windowId, options) {
+    dispatch({
+      actionType: appConstants.APP_NATIVE_NOTIFICATION_CREATE,
+      options,
+      queryInfo: {
+        windowId
+      }
+    })
+  },
+
   onPublisherTimestamp: function (timestamp, updateList) {
     dispatch({
       actionType: appConstants.APP_ON_PUBLISHER_TIMESTAMP,
@@ -1923,10 +1933,11 @@ const appActions = {
     })
   },
 
-  onUserModelDemoValue: function (value) {
+  onUserModelLog: function (eventName, data) {
     dispatch({
-      actionType: appConstants.APP_ON_USERMODEL_DEMO_VALUE,
-      value
+      actionType: appConstants.APP_ON_USERMODEL_LOG,
+      eventName,
+      data
     })
   },
 
