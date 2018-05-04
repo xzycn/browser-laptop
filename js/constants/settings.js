@@ -48,6 +48,7 @@ const settings = {
   SHUTDOWN_CLEAR_AUTOCOMPLETE_DATA: 'shutdown.clear-autocomplete-data',
   SHUTDOWN_CLEAR_AUTOFILL_DATA: 'shutdown.clear-autofill-data',
   SHUTDOWN_CLEAR_SITE_SETTINGS: 'shutdown.clear-site-settings',
+  SHUTDOWN_CLEAR_ADS: 'shutdown.clear-ads',
   FLASH_INSTALLED: 'security.flash.installed',
   FULLSCREEN_CONTENT: 'security.fullscreen.content',
   AUTOPLAY_MEDIA: 'security.autoplay.media',

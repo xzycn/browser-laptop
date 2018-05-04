@@ -31,6 +31,7 @@ class ClearBrowsingDataPanel extends React.Component {
     this.onToggleAutocompleteData = this.onToggleSetting.bind(this, 'autocompleteData')
     this.onToggleAutofillData = this.onToggleSetting.bind(this, 'autofillData')
     this.onToggleSavedSiteSettings = this.onToggleSetting.bind(this, 'savedSiteSettings')
+    this.onToggleAdsSettings = this.onToggleSetting.bind(this, 'adsSettings')
     this.onClear = this.onClear.bind(this)
     this.onCancel = this.onCancel.bind(this)
   }
@@ -75,6 +76,7 @@ class ClearBrowsingDataPanel extends React.Component {
     props.autocompleteData = data.get('autocompleteData')
     props.autofillData = data.get('autofillData')
     props.savedSiteSettings = data.get('savedSiteSettings')
+    props.adsSettings = data.get('adsSettings')
 
     return props
   }
@@ -120,6 +122,11 @@ class ClearBrowsingDataPanel extends React.Component {
             testId='siteSettingsSwitch'
             checkedOn={this.props.savedSiteSettings}
             onClick={this.onToggleSavedSiteSettings} />
+          <SwitchControl
+            rightl10nId='Brave ads'
+            testId='adsSettingsSwitch'
+            checkedOn={this.props.adsSettings}
+            onClick={this.onToggleAdsSettings} />
         </CommonFormSection>
         <CommonFormSection buttons>
           <Button className='whiteButton'
