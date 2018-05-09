@@ -1857,7 +1857,7 @@ const onWalletProperties = (state, body) => {
     if (balance > 0) {
       state = ledgerState.setInfoProp(state, 'userHasFunded', true)
     }
-    lockInContributionAmount(state, balance)
+    module.exports.lockInContributionAmount(state, balance)
   }
 
   // Rates
@@ -3121,7 +3121,8 @@ const getMethods = () => {
     addSiteVisit,
     shouldTrackTab,
     recoverWalletCallback,
-    getFavIcon
+    getFavIcon,
+    lockInContributionAmount
   }
 
   let privateMethods = {}
