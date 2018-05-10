@@ -1101,10 +1101,7 @@ const backupKeys = (state, backupAction) => {
   const fs = require('fs')
 
   if (backupAction === 'print') {
-    tabs.create({url: appUrlUtil.aboutUrls.get('about:printkeys')})
-
-    // we do not check whether the user actually printed the backup word list
-    return aboutPreferencesState.setBackupStatus(state, true)
+    return module.exports.backupOnPrint(state)
   }
 
   const dialog = electron.dialog
@@ -1127,6 +1124,12 @@ const backupKeys = (state, backupAction) => {
     }
   })
   return state
+}
+
+const backupOnPrint = (state) => {
+  tabs.create({url: appUrlUtil.aboutUrls.get('about:printkeys')})
+  // we do not check whether the user actually printed the backup word list
+  return aboutPreferencesState.setBackupStatus(state, true)
 }
 
 const fileRecoveryKeys = (state, recoveryKeyFile) => {
@@ -3122,7 +3125,8 @@ const getMethods = () => {
     shouldTrackTab,
     recoverWalletCallback,
     getFavIcon,
-    lockInContributionAmount
+    lockInContributionAmount,
+    backupOnPrint
   }
 
   let privateMethods = {}
