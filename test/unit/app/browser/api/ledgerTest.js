@@ -2383,6 +2383,40 @@ describe('ledger api unit tests', function () {
     })
   })
 
+  describe('backupKeys', function () {
+    let backupOnPrintSpy
+
+    before(function () {
+      backupOnPrintSpy = sinon.spy(ledgerApi, 'backupOnPrint')
+    })
+
+    after(function () {
+      backupOnPrintSpy.restore()
+    })
+
+    afterEach(function () {
+      backupOnPrintSpy.reset()
+    })
+
+    it('calls backupOnPrint when backupAction is set to print', function () {
+      const stateWithPreferences = defaultAppState
+        .setIn(['about'], Immutable.fromJS({
+          preferences: {}
+        }))
+      ledgerApi.backupKeys(stateWithPreferences, 'print')
+      assert(backupOnPrintSpy.calledOnce)
+    })
+
+    it('sets backupSucceeded to true when backupAction is set to print', function () {
+      const stateWithPreferences = defaultAppState
+        .setIn(['about'], Immutable.fromJS({
+          preferences: {}
+        }))
+      const result = ledgerApi.backupKeys(stateWithPreferences, 'print')
+      assert(result.getIn(['about', 'preferences', 'backupSucceeded']))
+    })
+  })
+
   describe('checkReferralActivity', function () {
     let checkForUpdateSpy, roundtripSpy, fakeClock
 
