@@ -264,7 +264,6 @@ const onBootStateFile = (state) => {
     console.error('ledger client boot error: ', ex)
     return state
   }
-
   if (client.sync(callback) === true) {
     run(state, random.randomInt({min: ledgerUtil.milliseconds.minute, max: 5 * ledgerUtil.milliseconds.minute}))
   }
@@ -1165,7 +1164,7 @@ const recoverKeys = (state, useRecoveryKeyFile, key) => {
     return state
   }
 
-  client.recoverWallet(null, recoveryKey, recoverWalletCallback)
+  client.recoverWallet(null, recoveryKey, module.exports.recoverWalletCallback)
 
   return state
 }
@@ -1958,8 +1957,12 @@ const setPaymentInfo = (amount) => {
       err = err.toString()
     }
 
-    appActions.onBraveryProperties(err, result)
+    module.exports.onBraveryPropertiesCallback(err, result)
   })
+}
+
+const onBraveryPropertiesCallback = (err, result) => {
+  appActions.onBraveryProperties(err, result)
 }
 
 const onBraveryProperties = (state, error, result) => {
@@ -1977,7 +1980,7 @@ const onBraveryProperties = (state, error, result) => {
     if (result.properties && result.properties.wallet && result.properties.wallet.keyinfo) {
       result.properties.wallet.keyinfo.seed = uintKeySeed(result.properties.wallet.keyinfo.seed)
     }
-    muonWriter(statePath, result)
+    module.exports.muonWriter(statePath, result)
   }
 
   return state
@@ -2002,7 +2005,6 @@ const uintKeySeed = (currentSeed) => {
 
 const getBalance = (state) => {
   if (!client) return
-
   const balanceFn = module.exports.getBalance.bind(null, state)
   balanceTimeoutId = setTimeout(balanceFn, 1 * ledgerUtil.milliseconds.minute)
   return getPaymentInfo(state)
@@ -2023,6 +2025,10 @@ const callback = (err, result, delayTime) => {
     }
   }
 
+  module.exports.onLedgerCallbackAction(result, delayTime)
+}
+
+const onLedgerCallbackAction = (result, delayTime) => {
   appActions.onLedgerCallback(result, delayTime)
 }
 
@@ -2103,7 +2109,7 @@ const onCallback = (state, result, delayTime) => {
   }
 
   // persist the new ledger state
-  muonWriter(statePath, regularResults)
+  module.exports.muonWriter(statePath, regularResults)
 
   run(state, delayTime)
 
@@ -2212,8 +2218,6 @@ const onFetchReferralHeaders = (state, err, response, body) => {
 }
 
 const initialize = (state, paymentsEnabled) => {
-  let fs
-
   if (!v2RulesetDB) v2RulesetDB = levelUp(pathName(v2RulesetPath))
   state = enable(state, paymentsEnabled)
 
@@ -2273,6 +2277,11 @@ const initialize = (state, paymentsEnabled) => {
     if (rule.consequent) ruleset.push(rule)
   })
   state = cacheRuleSet(state, ruleset)
+  return module.exports.initAccessStatePath(state, statePath)
+}
+
+const initAccessStatePath = (state, statePath) => {
+  let fs
 
   try {
     if (!fs) fs = require('fs')
@@ -2280,14 +2289,13 @@ const initialize = (state, paymentsEnabled) => {
       if (err) {
         return
       }
-
       fs.readFile(pathName(statePath), (err, data) => {
         if (err) {
           return console.error('read error: ' + err.toString())
         }
 
         try {
-          appActions.onInitRead(JSON.parse(data))
+          module.exports.onInitReadAction(state, JSON.parse(data))
           if (clientOptions.verboseP) {
             console.log('\nstarting up ledger client integration')
           }
@@ -2305,6 +2313,10 @@ const initialize = (state, paymentsEnabled) => {
     state = ledgerState.resetInfo(state)
     return state
   }
+}
+
+const onInitReadAction = (state, parsedData) => {
+  appActions.onInitRead(parsedData)
 }
 
 const getContributionAmount = (state) => {
@@ -2325,7 +2337,7 @@ const onInitRead = (state, parsedData) => {
     client = ledgerClient(null, underscore.extend({roundtrip: roundtrip}, clientOptions), null)
     parsedData = client.state
     getPaymentInfo(state)
-    muonWriter(statePath, parsedData)
+    module.exports.muonWriter(statePath, parsedData)
   }
 
   if (Array.isArray(parsedData.transactions)) {
@@ -2399,7 +2411,7 @@ const onFuzzing = () => {
 
 const onTimeUntilReconcile = (state, stateResult) => {
   state = getStateInfo(state, stateResult.toJS()) // TODO optimize
-  muonWriter(statePath, stateResult)
+  module.exports.muonWriter(statePath, stateResult)
 
   return state
 }
@@ -2527,7 +2539,7 @@ const run = (state, delayTime) => {
     if (!stateData && map) {
       stateData = client.state
     }
-    if (stateData) muonWriter(statePath, stateData)
+    if (stateData) module.exports.muonWriter(statePath, stateData)
   } catch (ex) {
     console.error('ledger client error(2): ' + ex.toString() + (ex.stack ? ('\n' + ex.stack) : ''))
   }
@@ -3126,7 +3138,13 @@ const getMethods = () => {
     recoverWalletCallback,
     getFavIcon,
     lockInContributionAmount,
-    backupOnPrint
+    backupOnPrint,
+    clientprep,
+    onBraveryPropertiesCallback,
+    muonWriter,
+    onInitReadAction,
+    initAccessStatePath,
+    onLedgerCallbackAction
   }
 
   let privateMethods = {}
