@@ -217,13 +217,15 @@ const getPublisherTimestamp = (updateList) => {
     return
   }
 
-  client.publisherTimestamp((err, result) => {
-    if (err) {
-      console.error('Error while retrieving publisher timestamp', err.toString())
-      return
-    }
-    appActions.onPublisherTimestamp(result.timestamp, updateList)
-  })
+  client.publisherTimestamp(module.exports.publisherTimestampCallback, updateList)
+}
+
+const publisherTimestampCallback = (err, result, updateList) => {
+  if (err) {
+    console.error('Error while retrieving publisher timestamp', err.toString())
+    return
+  }
+  appActions.onPublisherTimestamp(result.timestamp, updateList)
 }
 
 const addFoundClosed = (state) => {
@@ -1816,15 +1818,17 @@ const lockInContributionAmount = (state, balance) => {
 }
 
 const setNewTimeUntilReconcile = (newReconcileTime = null) => {
-  client.setTimeUntilReconcile(newReconcileTime, (err, stateResult) => {
-    if (err) return console.error('ledger setTimeUntilReconcile error: ' + err.toString())
+  client.setTimeUntilReconcile(newReconcileTime, module.exports.setNewTimeUntilReconcileCallback)
+}
 
-    if (!stateResult) {
-      return
-    }
+const setNewTimeUntilReconcileCallback = (err, stateResult) => {
+  if (err) return console.error('ledger setTimeUntilReconcile error: ' + err.toString())
 
-    appActions.onTimeUntilReconcile(stateResult)
-  })
+  if (!stateResult) {
+    return
+  }
+
+  appActions.onTimeUntilReconcile(stateResult)
 }
 
 const onWalletProperties = (state, body) => {
@@ -3150,7 +3154,9 @@ const getMethods = () => {
     initAccessStatePath,
     onLedgerCallbackAction,
     extendBraveryProps,
-    getWalletPropertiesCallback
+    getWalletPropertiesCallback,
+    publisherTimestampCallback,
+    setNewTimeUntilReconcileCallback
   }
 
   let privateMethods = {}
