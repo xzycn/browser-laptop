@@ -256,7 +256,6 @@ const onBootStateFile = (state) => {
   try {
     clientprep()
     client = ledgerClient(null, underscore.extend({roundtrip: module.exports.roundtrip}, clientOptions), null)
-
     getPublisherTimestamp()
   } catch (ex) {
     state = ledgerState.resetInfo(state)
@@ -271,7 +270,6 @@ const onBootStateFile = (state) => {
   module.exports.getBalance(state)
 
   bootP = false
-
   return state
 }
 
@@ -1782,25 +1780,26 @@ const getPaymentInfo = (state) => {
       amount = bravery.fee.amount
       currency = bravery.fee.currency
     }
-
-    client.getWalletProperties(amount, currency, function (err, body) {
-      if (err) {
-        if (err.message) {
-          console.error('getWalletProperties error: ' + err.message)
-        } else {
-          console.error('getWalletProperties error: ' + err.toString())
-        }
-        appActions.onWalletPropertiesError()
-        return
-      }
-
-      appActions.onWalletProperties(body)
-    })
+    client.getWalletProperties(amount, currency, module.exports.getWalletPropertiesCallback)
   } catch (ex) {
     console.error('properties error: ' + ex.toString())
   }
 
   return state
+}
+
+const getWalletPropertiesCallback = (err, body) => {
+  if (err) {
+    if (err.message) {
+      console.error('getWalletProperties error: ' + err.message)
+    } else {
+      console.error('getWalletProperties error: ' + err.toString())
+    }
+    appActions.onWalletPropertiesError()
+    return
+  }
+
+  appActions.onWalletProperties(body)
 }
 
 const lockInContributionAmount = (state, balance) => {
@@ -1951,7 +1950,8 @@ const setPaymentInfo = (amount) => {
     currency = 'BAT'
   }
 
-  underscore.extend(bravery.fee, { amount: amount, currency: currency })
+  bravery = module.exports.extendBraveryProps(bravery, amount, currency)
+
   client.setBraveryProperties(bravery, (err, result) => {
     if (err) {
       err = err.toString()
@@ -1959,6 +1959,10 @@ const setPaymentInfo = (amount) => {
 
     module.exports.onBraveryPropertiesCallback(err, result)
   })
+}
+
+const extendBraveryProps = (bravery, amount, currency) => {
+  return underscore.extend(bravery.fee, { amount: amount, currency: currency })
 }
 
 const onBraveryPropertiesCallback = (err, result) => {
@@ -3144,7 +3148,9 @@ const getMethods = () => {
     muonWriter,
     onInitReadAction,
     initAccessStatePath,
-    onLedgerCallbackAction
+    onLedgerCallbackAction,
+    extendBraveryProps,
+    getWalletPropertiesCallback
   }
 
   let privateMethods = {}
