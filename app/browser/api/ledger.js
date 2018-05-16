@@ -2338,7 +2338,7 @@ const onInitRead = (state, parsedData) => {
     fs.renameSync(pathName(statePath), pathName('ledger-state-btc.json'))
     state = ledgerState.resetInfo(state)
     clientprep()
-    client = ledgerClient(null, underscore.extend({roundtrip: roundtrip}, clientOptions), null)
+    client = ledgerClient(null, underscore.extend({roundtrip: module.exports.roundtrip}, clientOptions), null)
     parsedData = client.state
     getPaymentInfo(state)
     module.exports.muonWriter(statePath, parsedData)
